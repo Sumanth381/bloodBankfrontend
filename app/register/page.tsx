@@ -5,9 +5,13 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import FormSingleSelected from "@/commonComponent/singleSelected";
+import { RegisterUser } from "@/api/login";
+import { showNotification } from "@/redux/notificationslice";
+import { useDispatch } from "react-redux";
 
 const Register = () => {
   const router = useRouter();
+  const dispatch = useDispatch()
   const registerSchema = Yup.object({
     Name: Yup.string().required("Name is required"),
     phone: Yup.string().required("Phone No. is required"),
@@ -27,9 +31,37 @@ const Register = () => {
       password: "",
     },
     validationSchema: registerSchema,
-    onSubmit: (values) => {
-      console.log("Form Data:", values);
-      router.push("/login");
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const paylod = {
+          name: values.Name,
+          phone_number: values.phone,
+          email: values.Email,
+          password: values.password,
+          blood_type: values.bloodgroup,
+          address: values.address,
+        };
+
+        const res = await RegisterUser(paylod);
+
+        dispatch(
+          showNotification({ message: res.message, severity: "success" })
+        );
+
+        resetForm();
+
+        router.push("/login");
+      } catch (error: any) {
+        console.log(error);
+
+        dispatch(
+          showNotification({
+            message: error.message || "Register failed",
+            severity: "error",
+          })
+        );
+
+      }
     },
   });
 

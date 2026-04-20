@@ -5,8 +5,12 @@ import { Box, Typography, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { login } from "@/api/login";
+import { useDispatch } from "react-redux";
+import { showNotification } from "@/redux/notificationslice";
 
 const Login = () => {
+  const dispatch = useDispatch()
   const router = useRouter();
   const loginSchema = Yup.object({
     Email: Yup.string()
@@ -22,9 +26,32 @@ const Login = () => {
       Password: "",
     },
     validationSchema: loginSchema,
-    onSubmit: (values) => {
-      console.log("Form Data:", values);
-      router.push("/");
+    onSubmit: async (values) => {
+      try {
+        const payload = {
+          email: values.Email,
+          password: values.Password
+        }
+
+        const response = await login(payload)
+        const token = response.data.token;
+        document.cookie = `token=${token}; path=/`;
+        const user = response.data.user;
+        localStorage.setItem("user", JSON.stringify(user));
+
+        dispatch(showNotification({ message: response.message, severity: "success" }))
+
+        router.replace("/");
+
+      } catch (error: any) {
+        console.log(error,"error")
+        dispatch(
+          showNotification({
+            message: error.message || "Login failed",
+            severity: "error",
+          })
+        );
+      }
     },
   });
   return (
@@ -137,7 +164,7 @@ const Login = () => {
                   fontSize: "20px",
                 }}
 
-                
+
               >
                 Login
               </Button>

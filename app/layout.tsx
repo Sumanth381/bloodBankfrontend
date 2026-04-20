@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import icon from "../public/assets/icon.jpg";
+import Providers from "@/redux/provider";
+import Notification from "@/commonComponent/Notification";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,11 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Blood Bank App",
   description: "Blood Bank Management System",
-
   icons: {
     icon: "/assets/bloodicon.svg",
   },
-
   openGraph: {
     title: "Blood Bank App",
     description: "Donate blood, save lives",
@@ -37,15 +36,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>
+          {children}
+          <Notification />
+        </Providers>
+
+      </body>
     </html>
   );
 }
