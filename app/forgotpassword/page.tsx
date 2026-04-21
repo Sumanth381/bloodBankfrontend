@@ -4,9 +4,13 @@ import { Box, Button, Paper, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
+import { forgotPassword } from "@/api/login";
+import { useDispatch } from "react-redux";
+import { showNotification } from "@/redux/notificationslice";
 
 const ForgotPassword = () => {
   const router = useRouter();
+  const dispatch = useDispatch()
   const registerSchema = Yup.object({
     Email: Yup.string().required("Email is required"),
     password: Yup.string().required("Password is required"),
@@ -18,9 +22,33 @@ const ForgotPassword = () => {
       password: "",
     },
     validationSchema: registerSchema,
-    onSubmit: (values) => {
-      console.log("Form Data:", values);
-      router.push("/login");
+    onSubmit: async (values, { resetForm }) => {
+      try {
+
+        const payload = {
+          email: values.Email,
+          password: values.password
+        }
+
+        const res = await forgotPassword(payload)
+        dispatch(
+          showNotification({ message: res.message, severity: "success" })
+        );
+
+        resetForm();
+        router.push("/login");
+
+      } catch (error:any) {
+
+        dispatch(
+          showNotification({
+            message: error.message || "Register failed",
+            severity: "error",
+          })
+        );
+
+      }
+
     },
   });
   return (
@@ -89,7 +117,7 @@ const ForgotPassword = () => {
                 backgroundColor: "#f2ddff",
                 color: "blue",
                 fontSize: "20px",
-                marginBottom:"20px"
+                marginBottom: "20px"
               }}
             >
               Forgot Password

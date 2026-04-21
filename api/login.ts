@@ -28,3 +28,14 @@ export const RegisterUser = async(data:register)=>{
     return response.data
 
 }
+
+
+export interface forgot_password{
+    email:string,
+    password:string
+}
+
+export const forgotPassword = async(data:forgot_password)=>{
+    const response = await Api.post('/auth/forgot_password',data)
+    return response.data
+}
